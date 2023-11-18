@@ -9,11 +9,11 @@ import sympy as s
 
 
 SPACE_LIM = 20
-default_values = np.linspace(-SPACE_LIM, SPACE_LIM, 200)
+default_values = np.linspace(-SPACE_LIM, SPACE_LIM, 400)
 
-v1: Matrix = Matrix([[1], [3]])
-v2: Matrix = Matrix([[8], [-1]])
-v3: Matrix = Matrix([[5], [2]])
+v1: Matrix = Matrix([[2], [3]])
+v2: Matrix = Matrix([[7], [-2]])
+v3: Matrix = Matrix([[4], [1]])
 
 styleList = ["-D", "-.o", "-.D", "-.", "--", "-"]
 
@@ -37,9 +37,10 @@ class System:
     yStyle: str
     plotName: str
     values: np.ndarray
+    isDiscr: bool
 
     def __init__(self, A, mainVect, vectors: [Matrix] = None, color: Color = Color.red, xStyle="-", yStyle="--",
-                 plotName: str = None, values: np.ndarray = default_values):
+                 plotName: str = None, values: np.ndarray = default_values, isDiscr=False):
         self.A = A
         self.mainVect = mainVect
         self.vectors = vectors
@@ -48,11 +49,18 @@ class System:
         self.yStyle = yStyle
         self.plotName = plotName
         self.values = values
+        self.isDiscr = isDiscr
 
     def generateVectors(self):
-        self.vectors = []
-        for t in self.values:
-            self.vectors.append(s.exp(self.A * t) * self.mainVect)
+        if not self.isDiscr:
+            self.vectors = []
+            for t in self.values:
+                self.vectors.append(s.exp(self.A * t) * self.mainVect)
+
+        else:
+            self.vectors = [self.A * self.mainVect]
+            for i in range(len(default_values) - 1):
+                self.vectors.append(self.A * self.vectors[i])
 
     def printInfo(self, b: bool = True):
         print("Вектор - " + str(self.mainVect.tolist()))
@@ -85,10 +93,14 @@ def drawColoredPlots(systems: [System], plotName: str, showVect: bool = False, l
 
             ax.plot([0, system.mainVect[0, 0] * SPACE_LIM], [0, system.mainVect[1, 0] * SPACE_LIM],
                     ":", color=system.color.value, label=legend)
+
+            ax.set_xlabel("t")
         else:
             ax.plot(pX, pY, "-", color=system.color.value, label=legend + " x(t)")
+            ax.set_xlabel("x0")
+            ax.set_ylabel("x1")
 
-    ax.set_xlim([0, SPACE_LIM])
+    #ax.set_xlim([0, SPACE_LIM])
 
     if limit:
         ax.set_xlim([-SPACE_LIM, SPACE_LIM])
@@ -99,20 +111,6 @@ def drawColoredPlots(systems: [System], plotName: str, showVect: bool = False, l
 
     ax.set_title("Задание №" + str(plotName))
     plt.show()
-
-
-# def getP(matrix: Matrix) -> Matrix:
-#     l = int(len(matrix)**0.5)
-#
-#     res: Matrix = s.eye(l)
-#     vectors = getEigenvectors(matrix)
-#
-#     for i in range(l):
-#         v = vectors[i]
-#         for j in range(l):
-#             res[j, i] = v[j]
-#
-#     return res
 
 
 def getEigenvectors(m: Matrix) -> [Matrix]:
@@ -132,6 +130,9 @@ def printEigenValues(m: Matrix):
         print("\t" + str(row))
 
     vals = m.eigenvects()
+    isStable = True
+    isNotAsymp = True
+
     pos = 1
     print("Спектральный анализ:")
     for value in vals:
@@ -139,6 +140,21 @@ def printEigenValues(m: Matrix):
         for v in value[2]:
             print("\t" + str(list(v)))
         pos += 1
+
+        isNotAsymp = s.re(value[0]) == 0 and isNotAsymp
+
+        if isStable:
+            isStable = s.re(value[0]) < 0
+
+    stableText = "Система "
+    if not isNotAsymp:
+        stableText += "асимптотически "
+        if isStable: stableText += "устойчива"
+        else: stableText += "неустойчива"
+    else:
+        stableText += "устойчива"
+
+    print(Fore.GREEN + stableText + Fore.RESET)
 
 
 def printCoreAndRange(m: Matrix):
@@ -167,7 +183,7 @@ def hasComplex(array: []) -> bool:
     return False
 
 
-def showAll(m: Matrix, text: str, lock):
+def showAll(m: Matrix, text: str, lock, isDiscr=False):
     vs = [v1, v2, v3]
     cs = [Color.red, Color.orange, Color.green]
 
@@ -177,8 +193,12 @@ def showAll(m: Matrix, text: str, lock):
     printEigenValues(m)
 
     for i in range(len(vs)):
-        system: System = System(m, mainVect=vs[i], color=cs[i])
+        system: System = System(m, mainVect=vs[i], color=cs[i], isDiscr=isDiscr)
         system.generateVectors()
+        if isDiscr and i == 1:
+            array[0].xStyle = styleList[0]
+            array[0].yStyle = styleList[1]
+            break
         system.printInfo()
         array.append(system)
 
