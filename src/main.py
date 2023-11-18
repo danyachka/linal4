@@ -6,6 +6,8 @@ from utils import System
 from utils import Color
 import utils
 
+c = 0.5
+
 
 def p1_1():
     m: Matrix = Matrix([[-1, 0], [0, -1]])
@@ -63,7 +65,7 @@ def p3_1_6():
     m5 = Matrix([[1, 6], [0, 1]])
     utils.showAll(m5, "3.5", 0, True)
 
-    m6 = Matrix([[-1/8, 5], [0, -1/8]])
+    m6 = Matrix([[-1/8, 6], [0, -1/8]])
     utils.showAll(m6, "3.6", 1, True)
 
 
@@ -71,13 +73,13 @@ def p3_7_12():
     m1 = Matrix([[1/8, 1/32], [-1, -1/8]])
     utils.showAll(m1, "3.7", 1, True)
 
-    m2 = Matrix([[-1/8, 7], [0, 1/8]])
+    m2 = Matrix([[1/8, 6], [0, 1/8]])
     utils.showAll(m2, "3.8", 1, True)
 
     m3 = Matrix([[-2, 5], [0, -2]])
     utils.showAll(m3, "3.9", 0, True)
 
-    m4 = Matrix([[2, 1/32], [-1, -2]])
+    m4 = Matrix([[2, 8], [-1, -2]])
     utils.showAll(m4, "3.10", 0, True)
 
     m5 = Matrix([[2, 12], [0, 2]])

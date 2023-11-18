@@ -9,7 +9,7 @@ import sympy as s
 
 
 SPACE_LIM = 20
-default_values = np.linspace(-SPACE_LIM, SPACE_LIM, 400)
+default_values = np.linspace(-SPACE_LIM, SPACE_LIM, 500)
 
 v1: Matrix = Matrix([[2], [3]])
 v2: Matrix = Matrix([[7], [-2]])
@@ -100,8 +100,6 @@ def drawColoredPlots(systems: [System], plotName: str, showVect: bool = False, l
             ax.set_xlabel("x0")
             ax.set_ylabel("x1")
 
-    #ax.set_xlim([0, SPACE_LIM])
-
     if limit:
         ax.set_xlim([-SPACE_LIM, SPACE_LIM])
         ax.set_ylim([-SPACE_LIM, SPACE_LIM])
@@ -141,7 +139,9 @@ def printEigenValues(m: Matrix):
             print("\t" + str(list(v)))
         pos += 1
 
-        isNotAsymp = s.re(value[0]) == 0 and isNotAsymp
+        if isNotAsymp:
+            num = s.re(value[0])
+            isNotAsymp = 10 ** -50 > num > -10 ** -50
 
         if isStable:
             isStable = s.re(value[0]) < 0
@@ -152,7 +152,7 @@ def printEigenValues(m: Matrix):
         if isStable: stableText += "устойчива"
         else: stableText += "неустойчива"
     else:
-        stableText += "устойчива"
+        stableText += "не асимптотически устойчива"
 
     print(Fore.GREEN + stableText + Fore.RESET)
 
